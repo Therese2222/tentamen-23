@@ -48,8 +48,8 @@ while True:
     print(f'3: Registrere antall merder')
     print(f'4: Registrering av fisk')
 
-    print(f'8: Justering av forlager')
-    print(f'9: List ut informasjon')
+    print(f'5: Justering av forlager')
+    print(f'6: List ut informasjon')
     print(f'0: Avslutt')
     print(f'Valg: ')
     valg = input()
@@ -61,7 +61,7 @@ while True:
         m =  int(input())
         forBrukt = merder[m-1][0]*merder[m-1][1]
         kgForLager = float(kgForLager) - forBrukt
-
+#legger inn hvilken merde som er foret
         sqlsetning = f"INSERT INTO antallForing (Merder_som_er_matet) values ('{m}')"
         foringAntall.execute(sqlsetning) 
         conn.commit() 
@@ -76,9 +76,15 @@ while True:
         print(f'Nytt antall: ')
         antallForinger = input()
         foringerAntall = conn.cursor(as_dict=True) 
+
+        # legger inn hvor mange ganger fisken skal bli foret i databasen
+        #brude legges inn update istede så listen ikke blir for lang og forvirrende. dette gjelder alle funksjonene
         sqlsetning = f"INSERT INTO antallForinger (antall_foringer_daglig) values ('{antallForinger}')"
         foringerAntall.execute(sqlsetning) 
         conn.commit() 
+
+        
+
     if valg == '3':
         print(f'Justering av antall merder i anlegget. Antall merder resigtrert i dag er {antallMerder}.')
         print(f'Nytt antall: ')
@@ -98,11 +104,9 @@ while True:
         merdeNr = (input())
         #merder[merdeNr-1] = [antallFisk,kg]
 
-
-       # sql = "UPDATE merdeInfo SET merde_nummer = ('{merderNr}')"
+# her må update funksjonen forandres, fungerer ikke så langt. 
         merderAntall = conn.cursor(as_dict=True) 
         sqlsetning = f"SELECT * from MerderInfo WHERE merde_nummer = '{merdeNr}'"
-        #sqlsetning = "SELECT merde_nummer from merderInfo WHERE merde_nummer = ('{merderNr}')" 
 
         merderAntall.execute(sqlsetning) 
         print (merderAntall.fetchone())
@@ -113,19 +117,30 @@ while True:
 
         else:
             teste = conn.cursor(as_dict=True) 
-            sqlsetning = f"UPDATE MerderInfo SET antall_fisker = '{antallFisk}', antall_Foring = '{kg}' WHERE merde_nummer = '{merdeNr}'"
+            sqlsetning = f"UPDATE MerderInfo SET merdenummer = ' {merdeNr}', antall_fisker = '{antallFisk}', antall_Foring = '{kg}' WHERE merde_nummer = '{merdeNr}'"
+            #sqlsetning = f"UPDATE MerderInfo SET (merdenummer, antall_fisker, antall_Foring) values ('{merdeNr}', '{antallFisk}', '{kg}') WHERE merde_nummer = '{merdeNr}'"
             teste.execute(sqlsetning) 
 
-        
-       # infomerde = conn.cursor(as_dict=True)                        
-        #sqlsetning = f"INSERT INTO MerderInfo (merde_nummer, antall_fisker, antall_Foring) values ('{merdeNr}','{antallFisk}', '{kg}')"
-        #infomerde.execute(sqlsetning) 
-        #conn.commit() 
-    if valg == '8':
+
+    if valg == '5':
         print(f'Justering av for på lager. Antall for resigtrert i dag er {kgForLager} Kg.')
         print(f'Nytt antall: ')
         kgForLager = input()
-    if valg == '9':
+        tall = 1
+        slett = conn.cursor(as_dict=True)  
+        sqlsetning = "DELETE  FROM kgForLager"
+        slett.execute(sqlsetning) 
+        conn.commit() 
+
+        forlagring = conn.cursor(as_dict=True)       
+        sqlsetning = f"INSERT INTO kgForLager (antall) values ('{kgForLager}')"
+
+    
+        forlagring.execute(sqlsetning) 
+        conn.commit() 
+        #sqlsetning = f"INSERT INTO MerderInfo (merde_nummer, antall_fisker, antall_Foring) values ('{merdeNr}','{antallFisk}', '{kg}')"
+
+    if valg == '6':
         print(f'Antall foringer per dag: {antallForinger}')
         print(f'Antall merder : {antallMerder}')
         print(f'Antall kg for på lager: {kgForLager}')
@@ -134,6 +149,8 @@ while True:
         input()
     if valg == '0':
         break
+
+    #alle valgene burde ha update funksjon istede for insert. 
 
 
 
